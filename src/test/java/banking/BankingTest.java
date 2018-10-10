@@ -69,4 +69,54 @@ public class BankingTest {
 		ds.setPassword("sa");
 		return ds;
 	}	
+        
+        @Test //ou ( expected = Exception.class) et pas besoin du try catch
+	public void negativeBalance() throws Exception {
+		float amount = 110.0f;
+		int fromCustomer = 0;
+		int toCustomer = 1;
+                float before0 = myDAO.balanceForCustomer(fromCustomer);
+		float before1 = myDAO.balanceForCustomer(toCustomer);
+                try {
+                    myDAO.bankTransferTransaction(fromCustomer, toCustomer, amount);
+                    fail();
+                }
+                catch (Exception e) {
+                }
+		// Les balances ne doivent pas avoir été mises à jour dans les 2 comptes
+		assertEquals("Balance incorrecte !", before0, myDAO.balanceForCustomer(fromCustomer), 0.001f);
+		assertEquals("Balance incorrecte !", before1, myDAO.balanceForCustomer(toCustomer), 0.001f);	
+	}
+        
+        @Test //ou ( expected = Exception.class) et pas besoin du try catch
+	public void accountFromDoesNotExist() throws Exception {
+                float amount = 100.0f;
+                int fromCustomer = 2;
+                int toCustomer = 1;
+		float before1 = myDAO.balanceForCustomer(toCustomer);
+                try {
+                    myDAO.bankTransferTransaction(fromCustomer, toCustomer, amount);
+                    fail("Il doit y avoir une exception");
+                }
+                catch (Exception e) {
+                }
+		// La balance du compte existant ne doit pas avoir été mises à jour
+		assertEquals("Balance incorrecte !", before1, myDAO.balanceForCustomer(toCustomer), 0.001f);
+	}
+        
+        @Test //ou ( expected = Exception.class) et pas besoin du try catch
+	public void accountToDoesNotExist() throws Exception {
+                float amount = 100.0f;
+                int fromCustomer = 0;
+                int toCustomer = 2;
+		float before0 = myDAO.balanceForCustomer(fromCustomer);
+                try {
+                    myDAO.bankTransferTransaction(fromCustomer, toCustomer, amount);
+                    fail("Il doit y avoir une exception");
+                }
+                catch (Exception e) {
+                }
+		// La balance du compte existant ne doit pas avoir été mises à jour
+		assertEquals("Balance incorrecte !", before0, myDAO.balanceForCustomer(fromCustomer), 0.001f);
+	}
 }
