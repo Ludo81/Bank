@@ -45,14 +45,12 @@ public class BankingDAO {
 	public void bankTransferTransaction(int fromID, int toID, float amount) throws Exception {
 		if (amount < 0)
 			throw new IllegalArgumentException("Le montant ne doit pas être négatif");
-		// On calcule le résultat
 		String sql = "UPDATE Account SET Total = Total + ? WHERE CustomerID = ?";
 		try (	Connection myConnection = myDataSource.getConnection();
 			PreparedStatement statement = myConnection.prepareStatement(sql)) {
 			
-			myConnection.setAutoCommit(false); // On démarre une transaction
+			myConnection.setAutoCommit(false);
 			try {
-				// On débite le 1° client
 				statement.setFloat( 1, amount * -1);
                                 statement.setInt(2, fromID);
 				int numberUpdated = statement.executeUpdate();
@@ -61,7 +59,6 @@ public class BankingDAO {
                                     throw new Exception("Le compte"+fromID+" n'existe pas.");
                                 }
                                 
-				// On crédite le 2° client
 				statement.clearParameters();
 				statement.setFloat( 1, amount);
                                 statement.setInt(2, toID);
@@ -71,13 +68,11 @@ public class BankingDAO {
                                     throw new Exception("Le compte"+toID+" n'existe pas.");
                                 }
 
-				// Tout s'est bien passé, on peut valider la transaction
 				myConnection.commit();
 			} catch (Exception ex) {
-				myConnection.rollback(); // On annule la transaction
+				myConnection.rollback();
 				throw ex;       
 			} finally {
-				 // On revient au mode de fonctionnement sans transaction
 				myConnection.setAutoCommit(true);				
 			}
 		}
